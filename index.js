@@ -1,10 +1,10 @@
 function parser(jsonStr){
     // Undefined
     if(!jsonStr || jsonStr.length === 0){
-        return undefined
+        return undefined;
     }
 
-    const firstChar = jsonStr[0]
+    const firstChar = jsonStr[0];
 
     // Null
     if(firstChar === 'n'){
@@ -13,27 +13,44 @@ function parser(jsonStr){
 
     // String
     if(firstChar === '"'){
-        return jsonStr
+        return jsonStr.slice(1, jsonStr.length - 1);
     }
 
     // Boolean
     if(firstChar === 't' || firstChar === 'f'){
         if(firstChar === 't'){
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 
     // Number
     if(jsonStr.charCodeAt(0) > 48 && jsonStr.charCodeAt(0) < 57){
-        return Number(jsonStr)
+        return Number(jsonStr);
     }
 
     // Array
     if(firstChar === '['){
-
+        return parseArray(jsonStr.slice(1, jsonStr.length - 1));
     }
 }
+
+function parseArray(jsonStr){
+    let result = [], stack = [], len = jsonStr.length, start = 0;
+
+    for(let i = 0; i < len; i++){
+        if(!stack.length && (jsonStr[i] === ',' || i === len - 1)){
+            result.push(parser(jsonStr.slice(start, i)));
+            start = i + 1;
+        }
+    }
+
+    return result
+}
+
+
+console.log(parser(JSON.stringify(['test', 5, true])))
+console.log(parser(JSON.stringify([["["],[]])))
 
 console.log(parser(JSON.stringify(undefined)))
 console.log(parser(JSON.stringify(null)))
