@@ -35,11 +35,27 @@ function parser(jsonStr){
     }
 }
 
+function peek(stack){
+    return stack[stack.length - 1]
+}
+
 function parseArray(jsonStr){
     let result = [], stack = [], len = jsonStr.length, start = 0;
 
-    for(let i = 0; i < len; i++){
-        if(!stack.length && (jsonStr[i] === ',' || i === len - 1)){
+    for(let i = 0; i <= len; i++){
+        if(
+            (jsonStr[i] === '"' && peek(stack) === '"') || 
+            (jsonStr[i] === ']' && peek(stack) === '[')
+        ){
+            stack.pop();
+        }else if(
+            jsonStr[i] === '"' || 
+            (!stack.length && peek(stack) === '[')
+        ){
+            stack.push(jsonStr[i])
+        }
+        
+        if(!stack.length && (jsonStr[i] === ',' || i === len)){
             result.push(parser(jsonStr.slice(start, i)));
             start = i + 1;
         }
@@ -48,9 +64,11 @@ function parseArray(jsonStr){
     return result
 }
 
-
+console.log(parser(JSON.stringify([[[]]])))
 console.log(parser(JSON.stringify(['test', 5, true])))
-console.log(parser(JSON.stringify([["["],[]])))
+
+console.log(parser(JSON.stringify(['a', 'bc'])))
+console.log(parser(JSON.stringify(['[],'])))
 
 console.log(parser(JSON.stringify(undefined)))
 console.log(parser(JSON.stringify(null)))
